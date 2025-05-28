@@ -3,11 +3,47 @@
 <head>
   <meta charset="UTF-8">
   <title>Inventory Dashboard</title>
-  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      font-family: Arial;
+      background: #f4f4f4;
+      padding: 20px;
+    }
+    h2 {
+      text-align: center;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      margin-bottom: 15px;
+      box-sizing: border-box;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: center;
+    }
+    th {
+      background-color: #e0e0e0;
+    }
+    button {
+      padding: 5px 8px;
+      margin-left: 3px;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
   <h2>Inventory Dashboard</h2>
+
   <input type="text" id="search" placeholder="Search by Item Name..." onkeyup="filterTable()" />
+
   <table>
     <thead>
       <tr>
@@ -19,9 +55,81 @@
       </tr>
     </thead>
     <tbody id="inventory-table-body">
-      <!-- Data will load here -->
+      <!-- Data will be injected here -->
     </tbody>
   </table>
-  <script src="script.js"></script>
+
+  <script>
+    const BASE_URL = "https://script.google.com/a/macros/hicksindia.com/s/AKfycbw02ZIIzZipvdPxrBP3dZm1IbEnYgOfAJlphhsfocJl3ONpLKGbwC4VAITIjjOESH9Z/exec";
+    const DATA_URL = BASE_URL + "?action=get";
+    const UPDATE_BASE = BASE_URL + "?action=update";
+
+    let inventoryData = [];
+
+    function fetchInventory() {
+      fetch(DATA_URL)
+        .then(response => response.json())
+        .then(data => {
+          inventoryData = data;
+          renderTable(data);
+        })
+        .catch(err => console.error("Error fetching data:", err));
+    }
+
+    function renderTable(data) {
+      const tbody = document.getElementById("inventory-table-body");
+      tbody.innerHTML = "";
+
+      data.forEach(row => {
+        const [itemCode, itemName, avgDaily, currentQty] = row;
+        const safeId = itemName.replace(/[^a-zA-Z0-9]/g, "");
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${itemCode}</td>
+          <td>${itemName}</td>
+          <td>${avgDaily}</td>
+          <td>${currentQty}</td>
+          <td>
+            <input type="number" id="qty-${safeId}" placeholder="Qty" style="width:60px;" />
+            <button onclick="updateQty('${itemName}', true, '${safeId}')">+</button>
+            <button onclick="updateQty('${itemName}', false, '${safeId}')">-</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function updateQty(itemName, isAdd, safeId) {
+      const input = document.getElementById(`qty-${safeId}`);
+      const qty = parseInt(input.value);
+
+      if (isNaN(qty) || qty <= 0) {
+        alert("Enter a valid quantity.");
+        return;
+      }
+
+      const finalQty = isAdd ? qty : -qty;
+      const url = `${UPDATE_BASE}&itemName=${encodeURIComponent(itemName)}&qty=${finalQty}`;
+
+      fetch(url)
+        .then(res => res.text())
+        .then(msg => {
+          alert(msg);
+          fetchInventory(); // Refresh data
+        })
+        .catch(err => alert("Error updating stock."));
+    }
+
+    function filterTable() {
+      const searchTerm = document.getElementById("search").value.toLowerCase();
+      const filtered = inventoryData.filter(row =>
+        row[1].toLowerCase().includes(searchTerm)
+      );
+      renderTable(filtered);
+    }
+
+    window.onload = fetchInventory;
+  </script>
 </body>
 </html>
