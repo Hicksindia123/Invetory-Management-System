@@ -1,4 +1,4 @@
-const DEPLOYED_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyMT571uilBB60oEgRFxRq__N0RuZgvYrten01IxSklbQDW9Sjc9xf7d-9EDpSgWlKG/exec";
+const DEPLOYED_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz6TfKfaDcw1P-HxYduoiOspPHYp88gViI0P9Cci41R6PcDjhtPOY8AtanzD53jqDwv/exec";
 
 let inventoryData = [];
 
