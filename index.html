@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Inventory Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h2>Inventory Dashboard</h2>
+  <input type="text" id="search" placeholder="Search by Item Name..." onkeyup="filterTable()" />
+  <table>
+    <thead>
+      <tr>
+        <th>Item Code</th>
+        <th>Item Name</th>
+        <th>Avg Daily Consumption</th>
+        <th>Current Qty</th>
+        <th>Update Stock</th>
+      </tr>
+    </thead>
+    <tbody id="inventory-table-body">
+      <!-- Data will load here -->
+    </tbody>
+  </table>
+  <script src="script.js"></script>
+</body>
+</html>
