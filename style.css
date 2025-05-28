@@ -1,0 +1,38 @@
+body {
+  font-family: Arial;
+  padding: 20px;
+  background-color: #f8f9fa;
+}
+
+h2 {
+  text-align: center;
+}
+
+input[type="text"] {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  font-size: 16px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 30px;
+}
+
+th, td {
+  border: 1px solid #ccc;
+  padding: 10px;
+  text-align: center;
+}
+
+th {
+  background-color: #e9ecef;
+}
+
+button {
+  padding: 5px 8px;
+  margin-left: 5px;
+  cursor: pointer;
+}
