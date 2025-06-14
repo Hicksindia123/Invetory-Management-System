@@ -1,131 +1,144 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
   <meta charset="UTF-8" />
-  <title>Inventory Dashboard</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <title>Credit Limit Form</title>
+  <style>
+    body {
+      font-family: Arial;
+      max-width: 600px;
+      margin: 20px auto;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 8px;
+      margin: 8px 0;
+    }
+    label {
+      font-weight: bold;
+    }
+    button {
+      background: teal;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
 </head>
-<body class="bg-gray-100 p-6">
-  <div class="max-w-6xl mx-auto bg-white p-6 rounded-xl shadow-md">
-    <h1 class="text-3xl font-bold text-center mb-6 text-blue-700">Inventory Dashboard</h1>
+<body>
+  <h2>Credit Limit Form</h2>
+  <form id="creditForm">
+    <label>Client Name</label>
+    <input list="clients" name="clientName" id="clientName" required>
+    <datalist id="clients"></datalist>
 
-    <!-- Filter Input -->
-    <input type="text" id="search" placeholder="Search by Item Name..." class="w-full mb-4 p-2 border border-gray-300 rounded" onkeyup="filterTable()" />
+    <label>State</label>
+    <select id="state" required></select>
 
-    <!-- Inventory Table -->
-    <div class="overflow-auto max-h-[400px]">
-      <table class="min-w-full text-sm text-center border">
-        <thead class="bg-gray-200 sticky top-0">
-          <tr>
-            <th class="px-4 py-2">Item Code</th>
-            <th class="px-4 py-2">Item Name</th>
-            <th class="px-4 py-2">Daily Consumption</th>
-            <th class="px-4 py-2">Current Qty</th>
-            <th class="px-4 py-2">Update Stock</th>
-          </tr>
-        </thead>
-        <tbody id="inventory-table-body" class="bg-white">
-          <!-- JS will insert rows here -->
-        </tbody>
-      </table>
+    <label>Station</label>
+    <select id="station" required></select>
+
+    <label>New Credit Limit</label>
+    <input type="number" id="newCreditLimit" required>
+
+    <label>Remark</label>
+    <textarea id="remark"></textarea>
+
+    <div id="yatharthSection" style="display:none;">
+      <label>Yatharth Sir Sign Image Link</label>
+      <input type="text" id="yatharthLink">
     </div>
 
-    <!-- Add New Product -->
-    <div class="mt-10">
-      <h2 class="text-xl font-semibold mb-3">Add New Product</h2>
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <input id="newCode" type="text" placeholder="Item Code" class="p-2 border rounded" />
-        <input id="newName" type="text" placeholder="Item Name" class="p-2 border rounded" />
-        <input id="newDaily" type="number" placeholder="Daily Consumption" class="p-2 border rounded" />
-        <input id="newQty" type="number" placeholder="Current Qty" class="p-2 border rounded" />
-      </div>
-      <button onclick="addProduct()" class="mt-4 bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">Add Product</button>
+    <div id="siddhartSection" style="display:none;">
+      <label>Siddhart Sir Sign Image Link</label>
+      <input type="text" id="siddhartLink">
     </div>
-  </div>
+
+    <button type="submit">Submit</button>
+  </form>
 
   <script>
-    const BASE_URL = "https://script.google.com/macros/s/AKfycbyRH53tn8Z7LF42avVOMnh-loqjfsKM7kLfgXOcZLnnhZ5_EW-DGebLlb2lIlJgxkJV/exec";
+    const API_BASE = "https://script.google.com/macros/s/AKfycbwDjNfSM9kxNx8vlYwjhKG2mnCshlbIU_nb2qyx3CAJ7xl-DPvnd6PzVC19V5k-SpSI/exec";
 
-    let inventoryData = [];
-
-    function fetchInventory() {
-      fetch(`${BASE_URL}?action=get`)
-        .then(res => res.json())
-        .then(data => {
-          inventoryData = data;
-          renderTable(data);
-        });
+    async function fetchData(endpoint, params = {}) {
+      const url = new URL(API_BASE);
+      url.searchParams.set("action", endpoint);
+      for (const key in params) {
+        url.searchParams.set(key, params[key]);
+      }
+      const res = await fetch(url);
+      return await res.json();
     }
 
-    function renderTable(data) {
-      const tbody = document.getElementById("inventory-table-body");
-      tbody.innerHTML = "";
+    function $(id) {
+      return document.getElementById(id);
+    }
 
-      data.forEach((row, i) => {
-        const [code, name, daily, qty] = row;
-        const safeId = `${code.replace(/\W/g, "")}_${name.replace(/\W/g, "")}_${i}`;
-
-        tbody.innerHTML += `
-          <tr class="border">
-            <td class="px-2 py-1">${code}</td>
-            <td class="px-2 py-1">${name}</td>
-            <td class="px-2 py-1">${daily}</td>
-            <td class="px-2 py-1">${qty}</td>
-            <td class="px-2 py-1">
-              <input id="qty-${safeId}" type="number" min="1" placeholder="Qty" class="w-20 p-1 border rounded" />
-              <button onclick="updateQty('${code}', '${name}', true, '${safeId}')" class="bg-green-500 text-white px-2 py-1 rounded ml-1">+</button>
-              <button onclick="updateQty('${code}', '${name}', false, '${safeId}')" class="bg-red-500 text-white px-2 py-1 rounded ml-1">−</button>
-            </td>
-          </tr>`;
+    async function loadFormData() {
+      const { clients, states } = await fetchData("getFormData");
+      clients.forEach(c => {
+        const opt = document.createElement("option");
+        opt.value = c;
+        $("clients").appendChild(opt);
+      });
+      states.forEach(s => {
+        const opt = document.createElement("option");
+        opt.value = s;
+        $("state").appendChild(opt);
       });
     }
 
-    function updateQty(code, name, isAdd, safeId) {
-      const input = document.getElementById(`qty-${safeId}`);
-      let qty = parseInt(input.value);
-      if (isNaN(qty) || qty <= 0) {
-        alert("Enter a valid quantity.");
-        return;
-      }
-
-      qty = isAdd ? qty : -qty;
-      const url = `${BASE_URL}?action=update&itemCode=${encodeURIComponent(code)}&itemName=${encodeURIComponent(name)}&qty=${qty}`;
-
-      fetch(url)
-        .then(res => res.text())
-        .then(msg => {
-          alert(msg);
-          fetchInventory();
+    $("state").addEventListener("change", async () => {
+      const state = $("state").value;
+      $("station").innerHTML = "";
+      if (state) {
+        const stations = await fetchData("getStationsByState", { state });
+        stations.forEach(s => {
+          const opt = document.createElement("option");
+          opt.value = s;
+          $("station").appendChild(opt);
         });
-    }
-
-    function filterTable() {
-      const keyword = document.getElementById("search").value.toLowerCase();
-      const filtered = inventoryData.filter(row => row[1].toLowerCase().includes(keyword));
-      renderTable(filtered);
-    }
-
-    function addProduct() {
-      const code = document.getElementById("newCode").value.trim();
-      const name = document.getElementById("newName").value.trim();
-      const daily = parseInt(document.getElementById("newDaily").value);
-      const qty = parseInt(document.getElementById("newQty").value);
-
-      if (!code || !name || isNaN(daily) || isNaN(qty)) {
-        alert("Please fill all fields correctly.");
-        return;
       }
+    });
 
-      const url = `${BASE_URL}?action=add&itemCode=${encodeURIComponent(code)}&itemName=${encodeURIComponent(name)}&daily=${daily}&qty=${qty}`;
-      fetch(url)
-        .then(res => res.text())
-        .then(msg => {
-          alert(msg);
-          fetchInventory();
-        });
-    }
+    $("newCreditLimit").addEventListener("input", async () => {
+      const client = $("clientName").value;
+      const state = $("state").value;
+      const newLimit = parseFloat($("newCreditLimit").value);
+      if (client && state && !isNaN(newLimit)) {
+        const currentLimit = parseFloat(await fetchData("getCurrentLimit", { clientName: client, state }));
+        $("yatharthSection").style.display = (currentLimit > 0 && newLimit >= currentLimit * 1.3) ? "block" : "none";
+        $("siddhartSection").style.display = (newLimit >= 450000) ? "block" : "none";
+      }
+    });
 
-    window.onload = fetchInventory;
+    $("creditForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const data = {
+        clientName: $("clientName").value,
+        state: $("state").value,
+        station: $("station").value,
+        newCreditLimit: parseFloat($("newCreditLimit").value),
+        remark: $("remark").value,
+        yatharthLink: $("yatharthLink").value,
+        siddhartLink: $("siddhartLink").value
+      };
+
+      await fetch(API_BASE, {
+        method: "POST",
+        body: JSON.stringify({ action: "submitForm", ...data }),
+        headers: { "Content-Type": "application/json" }
+      });
+
+      alert("Form submitted!");
+      $("creditForm").reset();
+      $("station").innerHTML = "";
+      $("yatharthSection").style.display = "none";
+      $("siddhartSection").style.display = "none";
+    });
+
+    loadFormData();
   </script>
 </body>
 </html>
