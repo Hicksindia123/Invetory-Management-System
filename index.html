@@ -1,113 +1,140 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Credit Limit Form</title>
   <style>
     body {
-      font-family: Arial;
-      max-width: 600px;
-      margin: 20px auto;
+      margin: 0;
+      padding: 0;
+      background: #f4f4f4;
+      font-family: Arial, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
     }
-    input, select, textarea {
-      width: 100%;
-      padding: 8px;
-      margin: 8px 0;
+
+    .form-container {
+      background: white;
+      padding: 40px 30px;
+      border-radius: 50%;
+      width: 420px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+      text-align: center;
     }
-    label {
+
+    h2 {
+      margin-bottom: 20px;
       font-weight: bold;
     }
-    button {
-      background: teal;
-      color: white;
-      padding: 10px 20px;
+
+    input[type="text"],
+    input[type="number"],
+    input[list],
+    textarea {
+      width: 90%;
+      padding: 10px 15px;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 25px;
+      font-size: 14px;
+    }
+
+    input[readonly] {
+      background: #f3f3f3;
+    }
+
+    input[type="submit"] {
+      width: 50%;
+      padding: 10px 15px;
+      margin-top: 20px;
       border: none;
+      border-radius: 10px;
+      background: linear-gradient(to right, #0500ff, #00e0ff);
+      color: white;
+      font-size: 16px;
       cursor: pointer;
+    }
+
+    input[type="submit"]:hover {
+      opacity: 0.9;
+    }
+
+    ::placeholder {
+      color: #999;
     }
   </style>
 </head>
 <body>
-  <h2>Credit Limit Form</h2>
-  <form id="creditForm">
-    <label>Client Name</label>
-    <input list="clients" name="clientName" id="clientName" required>
-    <datalist id="clients"></datalist>
+  <div class="form-container">
+    <h2>Credit Limit Form</h2>
+    <form id="creditForm">
+      <input list="clients" id="clientName" placeholder="Client Name" required>
+      <datalist id="clients"></datalist>
 
-    <label>State</label>
-    <select id="state" required></select>
+      <input type="text" id="state" placeholder="State" readonly>
+      <input type="text" id="station" placeholder="Station" readonly>
+      <input type="text" id="currentLimit" placeholder="Current Credit Limit" readonly>
+      <input type="number" id="newCreditLimit" placeholder="New Credit Limit" required>
+      <textarea id="remark" placeholder="Remark"></textarea>
 
-    <label>Station</label>
-    <select id="station" required></select>
+      <div id="yatharthSection" style="display:none;">
+        <input type="text" id="yatharthLink" placeholder="Yatharth Sir Sign Image Link">
+      </div>
 
-    <label>New Credit Limit</label>
-    <input type="number" id="newCreditLimit" required>
+      <div id="siddhartSection" style="display:none;">
+        <input type="text" id="siddhartLink" placeholder="Siddhart Sir Sign Image Link">
+      </div>
 
-    <label>Remark</label>
-    <textarea id="remark"></textarea>
-
-    <div id="yatharthSection" style="display:none;">
-      <label>Yatharth Sir Sign Image Link</label>
-      <input type="text" id="yatharthLink">
-    </div>
-
-    <div id="siddhartSection" style="display:none;">
-      <label>Siddhart Sir Sign Image Link</label>
-      <input type="text" id="siddhartLink">
-    </div>
-
-    <button type="submit">Submit</button>
-  </form>
+      <input type="submit" value="Submit">
+    </form>
+  </div>
 
   <script>
-    const API_BASE = "https://script.google.com/macros/s/AKfycbxY5fW5YzrROjxDM0LUWxCQUPq_sKaX8q3ZD71hPGNefvmGEH8LCXLv8yFn0Ol4ZPb6/exec";
-
-    function $(id) {
-      return document.getElementById(id);
-    }
+    const API = "https://script.google.com/macros/s/AKfycbxkRC8PUkvmpykmBCy234I2cOhQYoIU0jQ3XoqTMlf4vLRTYRlnJGeahPQQ0oCIguoo/exec";
+    const $ = id => document.getElementById(id);
 
     async function fetchData(action, params = {}) {
-      const url = new URL(API_BASE);
+      const url = new URL(API);
       url.searchParams.set("action", action);
-      for (const key in params) {
+      for (let key in params) {
         url.searchParams.set(key, params[key]);
       }
       const res = await fetch(url);
-      return await res.json();
+      return res.json();
     }
 
-    async function loadFormData() {
-      const { clients, states } = await fetchData("getFormData");
+    async function loadClients() {
+      const { clients } = await fetchData("getClients");
       clients.forEach(c => {
         const opt = document.createElement("option");
         opt.value = c;
         $("clients").appendChild(opt);
       });
-      states.forEach(s => {
-        const opt = document.createElement("option");
-        opt.value = s;
-        $("state").appendChild(opt);
-      });
     }
 
-    $("state").addEventListener("change", async () => {
-      const state = $("state").value;
-      $("station").innerHTML = "";
-      if (state) {
-        const stations = await fetchData("getStationsByState", { state });
-        stations.forEach(s => {
-          const opt = document.createElement("option");
-          opt.value = s;
-          $("station").appendChild(opt);
-        });
+    $("clientName").addEventListener("change", async () => {
+      const client = $("clientName").value;
+      if (client) {
+        const { state, station, currentLimit } = await fetchData("getClientDetails", { clientName: client });
+        $("state").value = state || "";
+        $("station").value = station || "";
+        $("currentLimit").value = currentLimit || "";
+
+        const newLimit = parseFloat($("newCreditLimit").value);
+        if (!isNaN(newLimit)) {
+          $("yatharthSection").style.display = (currentLimit && newLimit >= currentLimit * 1.3) ? "block" : "none";
+          $("siddhartSection").style.display = (newLimit >= 450000) ? "block" : "none";
+        }
       }
     });
 
-    $("newCreditLimit").addEventListener("input", async () => {
-      const client = $("clientName").value;
+    $("newCreditLimit").addEventListener("input", () => {
+      const current = parseFloat($("currentLimit").value);
       const newLimit = parseFloat($("newCreditLimit").value);
-      if (client && !isNaN(newLimit)) {
-        const currentLimit = parseFloat(await fetchData("getCurrentLimit", { clientName: client })) || 0;
-        $("yatharthSection").style.display = (currentLimit > 0 && newLimit >= currentLimit * 1.3) ? "block" : "none";
+      if (!isNaN(current) && !isNaN(newLimit)) {
+        $("yatharthSection").style.display = (newLimit >= current * 1.3) ? "block" : "none";
         $("siddhartSection").style.display = (newLimit >= 450000) ? "block" : "none";
       }
     });
@@ -125,7 +152,7 @@
         siddhartLink: $("siddhartLink").value
       };
 
-      const res = await fetch(API_BASE, {
+      const res = await fetch(API, {
         method: "POST",
         body: JSON.stringify(data),
         headers: { "Content-Type": "application/json" }
@@ -134,15 +161,15 @@
       if ((await res.json()).status === "success") {
         alert("Form submitted successfully!");
         $("creditForm").reset();
-        $("station").innerHTML = "";
+        $("state").value = "";
+        $("station").value = "";
+        $("currentLimit").value = "";
         $("yatharthSection").style.display = "none";
         $("siddhartSection").style.display = "none";
-      } else {
-        alert("Error submitting form.");
       }
     });
 
-    loadFormData();
+    loadClients();
   </script>
 </body>
 </html>
