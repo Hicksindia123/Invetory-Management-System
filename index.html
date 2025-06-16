@@ -32,7 +32,8 @@
     input[type="text"],
     input[type="number"],
     input[list],
-    textarea {
+    textarea,
+    input[type="file"] {
       width: 90%;
       padding: 10px 15px;
       margin: 8px 0;
@@ -45,54 +46,91 @@
       background: #f3f3f3;
     }
 
-    input[type="submit"] {
-      width: 50%;
-      padding: 10px 15px;
-      margin-top: 20px;
-      border: none;
-      border-radius: 10px;
-      background: linear-gradient(to right, #0500ff, #00e0ff);
-      color: white;
-      font-size: 16px;
-      cursor: pointer;
-    }
-
-    input[type="submit"]:hover {
-      opacity: 0.9;
-    }
-
     ::placeholder {
       color: #999;
+    }
+
+    .keycap {
+      position: relative;
+      display: inline-block;
+      width: 120px;
+      height: 50px;
+      border-radius: 10px;
+      background: linear-gradient(180deg, #282828, #202020);
+      box-shadow:
+        inset -8px 0 8px rgba(0, 0, 0, 0.15),
+        inset 0 -8px 8px rgba(0, 0, 0, 0.25),
+        0 0 0 2px rgba(0, 0, 0, 0.75),
+        10px 20px 25px rgba(0, 0, 0, 0.4);
+      overflow: hidden;
+      transition: transform 0.1s ease-in-out, box-shadow 0.1s ease-in;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      color: #e9e9e9;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+    }
+
+    .keycap:active {
+      transform: translateY(2px);
+      box-shadow:
+        inset -4px 0 4px rgba(0, 0, 0, 0.1),
+        inset 0 -4px 4px rgba(0, 0, 0, 0.15),
+        0 0 0 2px rgba(0, 0, 0, 0.5),
+        5px 10px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .keycap::before {
+      content: "";
+      position: absolute;
+      top: 3px;
+      left: 4px;
+      bottom: 14px;
+      right: 12px;
+      background: linear-gradient(90deg, #232323, #4a4a4a);
+      border-radius: 10px;
+      box-shadow:
+        -10px -10px 10px rgba(255, 255, 255, 0.25),
+        10px 5px 10px rgba(0, 0, 0, 0.15);
+      border-left: 1px solid #0004;
+      border-bottom: 1px solid #0004;
+      border-top: 1px solid #0009;
+      transition: all 0.1s ease-in-out;
+      z-index: -1;
     }
   </style>
 </head>
 <body>
   <div class="form-container">
     <h2>Credit Limit Form</h2>
-    <form id="creditForm">
-      <input list="clients" id="clientName" placeholder="Client Name" required>
+    <form id="creditForm" enctype="multipart/form-data">
+      <input list="clients" id="clientName" name="clientName" placeholder="Client Name" required>
       <datalist id="clients"></datalist>
 
-      <input type="text" id="state" placeholder="State" readonly>
-      <input type="text" id="station" placeholder="Station" readonly>
+      <input type="text" id="state" name="state" placeholder="State" readonly>
+      <input type="text" id="station" name="station" placeholder="Station" readonly>
       <input type="text" id="currentLimit" placeholder="Current Credit Limit" readonly>
-      <input type="number" id="newCreditLimit" placeholder="New Credit Limit" required>
-      <textarea id="remark" placeholder="Remark"></textarea>
+      <input type="number" id="newCreditLimit" name="newCreditLimit" placeholder="New Credit Limit" required>
+      <textarea id="remark" name="remark" placeholder="Remark"></textarea>
 
       <div id="yatharthSection" style="display:none;">
-        <input type="text" id="yatharthLink" placeholder="Yatharth Sir Sign Image Link">
+        <label>Upload Yatharth Sir Sign</label><br>
+        <input type="file" id="yatharthFile" name="yatharthFile" accept="image/*">
       </div>
 
       <div id="siddhartSection" style="display:none;">
-        <input type="text" id="siddhartLink" placeholder="Siddhart Sir Sign Image Link">
+        <label>Upload Siddhart Sir Sign</label><br>
+        <input type="file" id="siddhartFile" name="siddhartFile" accept="image/*">
       </div>
 
-      <input type="submit" value="Submit">
+      <br>
+      <button type="submit" class="keycap">Submit</button>
     </form>
   </div>
 
   <script>
-    const API = "https://script.google.com/macros/s/AKfycbxkRC8PUkvmpykmBCy234I2cOhQYoIU0jQ3XoqTMlf4vLRTYRlnJGeahPQQ0oCIguoo/exec";
+    const API = "https://script.google.com/macros/s/AKfycbyXUdzV_QUrbULiRfIpM3bLVEH2kdQ_0TFF3GIqmXUiFR9X4ULjiJnWDqHDj6cYWACm/exec";
     const $ = id => document.getElementById(id);
 
     async function fetchData(action, params = {}) {
@@ -141,24 +179,29 @@
 
     $("creditForm").addEventListener("submit", async (e) => {
       e.preventDefault();
-      const data = {
-        action: "submitForm",
-        clientName: $("clientName").value,
-        state: $("state").value,
-        station: $("station").value,
-        newCreditLimit: parseFloat($("newCreditLimit").value),
-        remark: $("remark").value,
-        yatharthLink: $("yatharthLink").value,
-        siddhartLink: $("siddhartLink").value
-      };
+
+      const formData = new FormData();
+      formData.append("clientName", $("clientName").value);
+      formData.append("state", $("state").value);
+      formData.append("station", $("station").value);
+      formData.append("newCreditLimit", $("newCreditLimit").value);
+      formData.append("remark", $("remark").value);
+
+      if ($("yatharthFile").files.length > 0) {
+        formData.append("yatharthFile", $("yatharthFile").files[0]);
+      }
+
+      if ($("siddhartFile").files.length > 0) {
+        formData.append("siddhartFile", $("siddhartFile").files[0]);
+      }
 
       const res = await fetch(API, {
         method: "POST",
-        body: JSON.stringify(data),
-        headers: { "Content-Type": "application/json" }
+        body: formData
       });
 
-      if ((await res.json()).status === "success") {
+      const result = await res.json();
+      if (result.status === "success") {
         alert("Form submitted successfully!");
         $("creditForm").reset();
         $("state").value = "";
@@ -166,6 +209,8 @@
         $("currentLimit").value = "";
         $("yatharthSection").style.display = "none";
         $("siddhartSection").style.display = "none";
+      } else {
+        alert("Submission failed.");
       }
     });
 
