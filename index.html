@@ -72,14 +72,22 @@
       if (role === "Admin") {
         document.getElementById("adminPanel").classList.remove("hidden");
         const assigneeDropdown = document.getElementById("taskAssignee");
-        employees.forEach(emp => {
-          const opt = document.createElement("option");
+        let empMap = {};
+employees.forEach(emp => {
+  const opt = document.createElement("option");
           opt.text = `${emp.name} (${emp.role})`;
+  empMap[emp.name] = emp.email;
           opt.value = emp.name;
           assigneeDropdown.appendChild(opt);
         });
       }
-      document.getElementById("taskSection").classList.remove("hidden");
+      if (role !== "Admin") if (role !== "Admin") document.getElementById("taskSection").classList.remove("hidden");
+
+      // Auto-fill email on assignee change
+      document.getElementById("taskAssignee").onchange = () => {
+        const selected = document.getElementById("taskAssignee").value;
+        document.getElementById("taskEmail").value = empMap[selected] || "";
+      };
       loadTasks(email);
     }
 
@@ -91,7 +99,7 @@
 
       tasks.forEach(task => {
         const deadline = new Date(task.Deadline).toLocaleDateString("en-GB");
-        const priorityColor = task.Priority === "High" ? "bg-red-500" : task.Priority === "Medium" ? "bg-yellow-500" : "bg-green-500";
+        const priorityColor = task.Priority === \"High\" ? \"bg-gradient-to-r from-pink-500 to-indigo-700 text-white\" : task.Priority === \"Medium\" ? \"bg-yellow-300\" : \"bg-green-400\";
 
         const el = document.createElement("div");
         el.className = "p-4 bg-white rounded shadow border-l-4 " + priorityColor;
