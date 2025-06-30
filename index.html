@@ -3,55 +3,107 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>User Task Dashboard</title>
+  <title>Task Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 text-gray-900 font-sans">
-  <div class="max-w-4xl mx-auto p-6">
-    <h1 class="text-3xl font-bold mb-4">🗂️ My Tasks</h1>
+<body class="bg-gradient-to-br from-indigo-100 to-blue-50 min-h-screen text-gray-900">
+  <div class="max-w-5xl mx-auto p-6">
+    <h1 class="text-4xl font-bold mb-4 text-blue-800">📋 Task Dashboard</h1>
 
-    <!-- Login -->
+    <!-- Login Section -->
     <div id="loginSection" class="mb-6">
-      <label class="block mb-2 font-semibold">Enter your email:</label>
+      <label class="block font-semibold mb-1">Enter your email:</label>
       <input id="emailInput" type="email" class="border rounded p-2 w-full" placeholder="you@example.com" />
-      <button onclick="loadTasks()" class="bg-blue-600 text-white px-4 py-2 mt-2 rounded">Login</button>
+      <button onclick="loadDashboard()" class="bg-blue-600 text-white px-4 py-2 mt-2 rounded hover:bg-blue-700">Login</button>
     </div>
 
-    <!-- Task List -->
-    <div id="taskSection" class="hidden">
-      <div class="mb-4">
-        <h2 class="text-xl font-semibold">Pending Tasks</h2>
-        <div id="taskList" class="space-y-3 mt-2"></div>
+    <!-- Admin Panel -->
+    <div id="adminPanel" class="hidden space-y-6 mb-10">
+      <!-- Add Employee -->
+      <div class="p-4 bg-white shadow rounded">
+        <h2 class="text-xl font-semibold mb-2">👥 Add Employee</h2>
+        <input id="empName" class="border p-2 rounded w-full mb-2" placeholder="Name" />
+        <input id="empEmail" class="border p-2 rounded w-full mb-2" placeholder="Email" />
+        <input id="empRole" class="border p-2 rounded w-full mb-2" placeholder="Role (e.g. Admin, MIS)" />
+        <input id="empDept" class="border p-2 rounded w-full mb-2" placeholder="Department" />
+        <button onclick="addEmployee()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Add Employee</button>
       </div>
+
+      <!-- Assign Task -->
+      <div class="p-4 bg-white shadow rounded">
+        <h2 class="text-xl font-semibold mb-2">📝 Assign Task</h2>
+        <input id="taskTitle" class="border p-2 rounded w-full mb-2" placeholder="Task Title" />
+        <select id="taskAssignee" class="border p-2 rounded w-full mb-2"></select>
+        <input id="taskEmail" class="border p-2 rounded w-full mb-2" placeholder="Assignee Email" />
+        <input id="taskDeadline" type="date" class="border p-2 rounded w-full mb-2" />
+        <select id="taskPriority" class="border p-2 rounded w-full mb-2">
+          <option>Low</option>
+          <option>Medium</option>
+          <option>High</option>
+        </select>
+        <textarea id="taskNotes" class="border p-2 rounded w-full mb-2" placeholder="Notes (optional)"></textarea>
+        <button onclick="assignTask()" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">Assign Task</button>
+      </div>
+    </div>
+
+    <!-- Task Section (User or Admin) -->
+    <div id="taskSection" class="hidden">
+      <h2 class="text-xl font-semibold text-blue-900 mb-4">📌 My Tasks</h2>
+      <div id="taskList" class="space-y-4"></div>
     </div>
   </div>
 
   <script>
-    const API_BASE = "https://script.google.com/macros/s/AKfycbxysg2237rhkUjlCkanS1hNHN5ChjSRBGuYyG8b9pk4usHpYJ9BbjEbQoJgUs4jPbkW/exec";
+    const API = "https://script.google.com/macros/s/AKfycbxysg2237rhkUjlCkanS1hNHN5ChjSRBGuYyG8b9pk4usHpYJ9BbjEbQoJgUs4jPbkW/exec";
+    let role = "User";
 
-    async function loadTasks() {
+    async function loadDashboard() {
       const email = document.getElementById("emailInput").value.trim();
-      if (!email) return alert("Please enter your email");
+      if (!email) return alert("Enter a valid email");
 
-      const res = await fetch(`${API_BASE}?action=getTasks&email=${email}`);
-      const tasks = await res.json();
+      const empRes = await fetch(`${API}?action=getEmployees`);
+      const employees = await empRes.json();
+      const me = employees.find(emp => emp.email.toLowerCase() === email.toLowerCase());
+
+      if (!me) return alert("Email not found in Doer list");
+      role = me.role === "Admin" ? "Admin" : "User";
 
       document.getElementById("loginSection").style.display = "none";
+      if (role === "Admin") {
+        document.getElementById("adminPanel").classList.remove("hidden");
+        const assigneeDropdown = document.getElementById("taskAssignee");
+        employees.forEach(emp => {
+          const opt = document.createElement("option");
+          opt.text = `${emp.name} (${emp.role})`;
+          opt.value = emp.name;
+          assigneeDropdown.appendChild(opt);
+        });
+      }
       document.getElementById("taskSection").classList.remove("hidden");
+      loadTasks(email);
+    }
 
+    async function loadTasks(email) {
+      const res = await fetch(`${API}?action=getTasks&email=${email}`);
+      const tasks = await res.json();
       const taskList = document.getElementById("taskList");
       taskList.innerHTML = "";
+
       tasks.forEach(task => {
+        const deadline = new Date(task.Deadline).toLocaleDateString("en-GB");
+        const priorityColor = task.Priority === "High" ? "bg-red-500" : task.Priority === "Medium" ? "bg-yellow-500" : "bg-green-500";
+
         const el = document.createElement("div");
-        el.className = "p-4 bg-white shadow rounded";
+        el.className = "p-4 bg-white rounded shadow border-l-4 " + priorityColor;
         el.innerHTML = `
           <div class="font-bold text-lg">${task.Task}</div>
-          <div>Deadline: <strong>${task.Deadline}</strong></div>
-          <div>Status: 
+          <div class="text-sm text-gray-700">📅 Deadline: <strong>${deadline}</strong></div>
+          <div class="text-sm text-gray-700">🔥 Priority: <strong>${task.Priority}</strong></div>
+          <div class="mt-1">Status: 
             <select onchange="updateStatus('${task['Task ID']}', this.value)" class="border p-1 rounded">
-              <option value="Pending" ${task.Status === "Pending" ? "selected" : ""}>Pending</option>
-              <option value="In Progress" ${task.Status === "In Progress" ? "selected" : ""}>In Progress</option>
-              <option value="Completed" ${task.Status === "Completed" ? "selected" : ""}>Completed</option>
+              <option ${task.Status === "Pending" ? "selected" : ""}>Pending</option>
+              <option ${task.Status === "In Progress" ? "selected" : ""}>In Progress</option>
+              <option ${task.Status === "Completed" ? "selected" : ""}>Completed</option>
             </select>
           </div>
           <div class="mt-2">
@@ -63,27 +115,51 @@
     }
 
     async function updateStatus(taskId, status) {
-      await fetch(API_BASE, {
+      await fetch(API, {
         method: "POST",
-        body: JSON.stringify({
-          action: "updateTask",
-          taskId,
-          status,
-          notes: ""
-        })
+        body: JSON.stringify({ action: "updateTask", taskId, status, notes: "" })
       });
     }
 
     async function updateNotes(taskId, notes) {
-      await fetch(API_BASE, {
+      await fetch(API, {
+        method: "POST",
+        body: JSON.stringify({ action: "updateTask", taskId, status: "", notes })
+      });
+    }
+
+    async function addEmployee() {
+      const name = document.getElementById("empName").value.trim();
+      const email = document.getElementById("empEmail").value.trim();
+      const role = document.getElementById("empRole").value.trim();
+      const dept = document.getElementById("empDept").value.trim();
+      if (!name || !email || !role || !dept) return alert("All fields required");
+      await fetch(API, {
+        method: "POST",
+        body: JSON.stringify({ action: "addEmployee", name, email, role, department: dept })
+      });
+      alert("Employee added.");
+    }
+
+    async function assignTask() {
+      const task = document.getElementById("taskTitle").value;
+      const assignedTo = document.getElementById("taskAssignee").value;
+      const email = document.getElementById("taskEmail").value;
+      const deadline = document.getElementById("taskDeadline").value;
+      const priority = document.getElementById("taskPriority").value;
+      const notes = document.getElementById("taskNotes").value;
+
+      if (!task || !assignedTo || !email || !deadline || !priority) return alert("Fill all required fields");
+
+      await fetch(API, {
         method: "POST",
         body: JSON.stringify({
-          action: "updateTask",
-          taskId,
-          status: "",
-          notes
+          action: "addTask",
+          task, assignedTo, email, deadline,
+          status: "Pending", priority, notes
         })
       });
+      alert("Task Assigned!");
     }
   </script>
 </body>
