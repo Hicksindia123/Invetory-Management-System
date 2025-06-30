@@ -1,224 +1,90 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Credit Limit Form</title>
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      background: #f4f4f4;
-      font-family: Arial, sans-serif;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-    }
-
-    .form-container {
-      background: white;
-      padding: 40px 30px;
-      border-radius: 50%;
-      width: 420px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.1);
-      text-align: center;
-    }
-
-    h2 {
-      margin-bottom: 20px;
-      font-weight: bold;
-    }
-
-    input[type="text"],
-    input[type="number"],
-    input[list],
-    textarea,
-    input[type="file"] {
-      width: 90%;
-      padding: 10px 15px;
-      margin: 8px 0;
-      border: 1px solid #ccc;
-      border-radius: 25px;
-      font-size: 14px;
-    }
-
-    input[readonly] {
-      background: #f3f3f3;
-    }
-
-    ::placeholder {
-      color: #999;
-    }
-
-    .keycap {
-      position: relative;
-      display: inline-block;
-      width: 120px;
-      height: 50px;
-      border-radius: 10px;
-      background: linear-gradient(180deg, #282828, #202020);
-      box-shadow:
-        inset -8px 0 8px rgba(0, 0, 0, 0.15),
-        inset 0 -8px 8px rgba(0, 0, 0, 0.25),
-        0 0 0 2px rgba(0, 0, 0, 0.75),
-        10px 20px 25px rgba(0, 0, 0, 0.4);
-      overflow: hidden;
-      transition: transform 0.1s ease-in-out, box-shadow 0.1s ease-in;
-      user-select: none;
-      -webkit-tap-highlight-color: transparent;
-      color: #e9e9e9;
-      font-size: 16px;
-      cursor: pointer;
-      border: none;
-    }
-
-    .keycap:active {
-      transform: translateY(2px);
-      box-shadow:
-        inset -4px 0 4px rgba(0, 0, 0, 0.1),
-        inset 0 -4px 4px rgba(0, 0, 0, 0.15),
-        0 0 0 2px rgba(0, 0, 0, 0.5),
-        5px 10px 15px rgba(0, 0, 0, 0.3);
-    }
-
-    .keycap::before {
-      content: "";
-      position: absolute;
-      top: 3px;
-      left: 4px;
-      bottom: 14px;
-      right: 12px;
-      background: linear-gradient(90deg, #232323, #4a4a4a);
-      border-radius: 10px;
-      box-shadow:
-        -10px -10px 10px rgba(255, 255, 255, 0.25),
-        10px 5px 10px rgba(0, 0, 0, 0.15);
-      border-left: 1px solid #0004;
-      border-bottom: 1px solid #0004;
-      border-top: 1px solid #0009;
-      transition: all 0.1s ease-in-out;
-      z-index: -1;
-    }
-  </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>User Task Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <div class="form-container">
-    <h2>Credit Limit Form</h2>
-    <form id="creditForm" enctype="multipart/form-data">
-      <input list="clients" id="clientName" name="clientName" placeholder="Client Name" required>
-      <datalist id="clients"></datalist>
+<body class="bg-gray-100 text-gray-900 font-sans">
+  <div class="max-w-4xl mx-auto p-6">
+    <h1 class="text-3xl font-bold mb-4">🗂️ My Tasks</h1>
 
-      <input type="text" id="state" name="state" placeholder="State" readonly required>
-      <input type="text" id="station" name="station" placeholder="Station" readonly required>
-      <input type="text" id="currentLimit" placeholder="Current Credit Limit" readonly required>
-      <input type="number" id="newCreditLimit" name="newCreditLimit" placeholder="New Credit Limit" required>
-      <textarea id="remark" name="remark" placeholder="Remark" required></textarea>
+    <!-- Login -->
+    <div id="loginSection" class="mb-6">
+      <label class="block mb-2 font-semibold">Enter your email:</label>
+      <input id="emailInput" type="email" class="border rounded p-2 w-full" placeholder="you@example.com" />
+      <button onclick="loadTasks()" class="bg-blue-600 text-white px-4 py-2 mt-2 rounded">Login</button>
+    </div>
 
-      <div id="yatharthSection" style="display:none;">
-        <label>Upload Yatharth Sir Sign</label><br>
-        <input type="file" id="yatharthFile" name="yatharthFile" accept="image/*">
+    <!-- Task List -->
+    <div id="taskSection" class="hidden">
+      <div class="mb-4">
+        <h2 class="text-xl font-semibold">Pending Tasks</h2>
+        <div id="taskList" class="space-y-3 mt-2"></div>
       </div>
-
-      <div id="siddhartSection" style="display:none;">
-        <label>Upload Siddhart Sir Sign</label><br>
-        <input type="file" id="siddhartFile" name="siddhartFile" accept="image/*">
-      </div>
-
-      <br>
-      <button type="submit" class="keycap">Submit</button>
-    </form>
+    </div>
   </div>
 
   <script>
-    const API = "https://script.google.com/macros/s/AKfycbwaSwAS1JMk-HdjsgG79eCib7dKbgNw4nSIgAjebj5BHXKYaTemlNIwwKOnyfnyMZ_P/exec";
-    const $ = id => document.getElementById(id);
+    const API_BASE = "https://script.google.com/macros/s/AKfycbxysg2237rhkUjlCkanS1hNHN5ChjSRBGuYyG8b9pk4usHpYJ9BbjEbQoJgUs4jPbkW/exec";
 
-    async function fetchData(action, params = {}) {
-      const url = new URL(API);
-      url.searchParams.set("action", action);
-      for (let key in params) {
-        url.searchParams.set(key, params[key]);
-      }
-      const res = await fetch(url);
-      return res.json();
-    }
+    async function loadTasks() {
+      const email = document.getElementById("emailInput").value.trim();
+      if (!email) return alert("Please enter your email");
 
-    async function loadClients() {
-      const { clients } = await fetchData("getClients");
-      clients.forEach(c => {
-        const opt = document.createElement("option");
-        opt.value = c;
-        $("clients").appendChild(opt);
+      const res = await fetch(`${API_BASE}?action=getTasks&email=${email}`);
+      const tasks = await res.json();
+
+      document.getElementById("loginSection").style.display = "none";
+      document.getElementById("taskSection").classList.remove("hidden");
+
+      const taskList = document.getElementById("taskList");
+      taskList.innerHTML = "";
+      tasks.forEach(task => {
+        const el = document.createElement("div");
+        el.className = "p-4 bg-white shadow rounded";
+        el.innerHTML = `
+          <div class="font-bold text-lg">${task.Task}</div>
+          <div>Deadline: <strong>${task.Deadline}</strong></div>
+          <div>Status: 
+            <select onchange="updateStatus('${task['Task ID']}', this.value)" class="border p-1 rounded">
+              <option value="Pending" ${task.Status === "Pending" ? "selected" : ""}>Pending</option>
+              <option value="In Progress" ${task.Status === "In Progress" ? "selected" : ""}>In Progress</option>
+              <option value="Completed" ${task.Status === "Completed" ? "selected" : ""}>Completed</option>
+            </select>
+          </div>
+          <div class="mt-2">
+            <textarea onchange="updateNotes('${task['Task ID']}', this.value)" class="w-full p-2 border rounded" placeholder="Notes...">${task.Notes || ""}</textarea>
+          </div>
+        `;
+        taskList.appendChild(el);
       });
     }
 
-    $("clientName").addEventListener("change", async () => {
-      const client = $("clientName").value;
-      if (client) {
-        const { state, station, currentLimit } = await fetchData("getClientDetails", { clientName: client });
-        $("state").value = state || "";
-        $("station").value = station || "";
-        $("currentLimit").value = currentLimit || "";
-
-        const newLimit = parseFloat($("newCreditLimit").value);
-        if (!isNaN(newLimit)) {
-          $("yatharthSection").style.display = (currentLimit && newLimit >= currentLimit * 1.3) ? "block" : "none";
-          $("siddhartSection").style.display = (newLimit >= 450000) ? "block" : "none";
-          $("yatharthFile").required = (newLimit >= currentLimit * 1.3);
-          $("siddhartFile").required = (newLimit >= 450000);
-        }
-      }
-    });
-
-    $("newCreditLimit").addEventListener("input", () => {
-      const current = parseFloat($("currentLimit").value);
-      const newLimit = parseFloat($("newCreditLimit").value);
-      if (!isNaN(current) && !isNaN(newLimit)) {
-        $("yatharthSection").style.display = (newLimit >= current * 1.3) ? "block" : "none";
-        $("siddhartSection").style.display = (newLimit >= 450000) ? "block" : "none";
-        $("yatharthFile").required = (newLimit >= current * 1.3);
-        $("siddhartFile").required = (newLimit >= 450000);
-      }
-    });
-
-    $("creditForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-
-      const formData = new FormData();
-      formData.append("clientName", $("clientName").value);
-      formData.append("state", $("state").value);
-      formData.append("station", $("station").value);
-      formData.append("newCreditLimit", $("newCreditLimit").value);
-      formData.append("remark", $("remark").value);
-
-      if ($("yatharthFile").files.length > 0) {
-        formData.append("yatharthFile", $("yatharthFile").files[0]);
-      }
-
-      if ($("siddhartFile").files.length > 0) {
-        formData.append("siddhartFile", $("siddhartFile").files[0]);
-      }
-
-      const res = await fetch(API, {
+    async function updateStatus(taskId, status) {
+      await fetch(API_BASE, {
         method: "POST",
-        body: formData
+        body: JSON.stringify({
+          action: "updateTask",
+          taskId,
+          status,
+          notes: ""
+        })
       });
+    }
 
-      const result = await res.json();
-      if (result.status === "success") {
-        alert("Form submitted successfully!");
-        $("creditForm").reset();
-        $("state").value = "";
-        $("station").value = "";
-        $("currentLimit").value = "";
-        $("yatharthSection").style.display = "none";
-        $("siddhartSection").style.display = "none";
-      } else {
-        alert("Submission failed.");
-      }
-    });
-
-    loadClients();
+    async function updateNotes(taskId, notes) {
+      await fetch(API_BASE, {
+        method: "POST",
+        body: JSON.stringify({
+          action: "updateTask",
+          taskId,
+          status: "",
+          notes
+        })
+      });
+    }
   </script>
 </body>
 </html>
