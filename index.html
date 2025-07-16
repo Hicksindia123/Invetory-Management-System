@@ -124,10 +124,13 @@
           <div class="mt-2">
             <label class="text-sm font-medium">Status:</label>
             <select onchange="updateStatus('${task['Task ID']}', this.value)" class="mt-1 border p-2 rounded w-full text-black">
-              <option ${task.Status === "Pending" ? "selected" : ""}>Pending</option>
-              <option ${task.Status === "In Progress" ? "selected" : ""}>In Progress</option>
-              <option ${task.Status === "Completed" ? "selected" : ""}>Completed</option>
-            </select>
+             <select onchange="updateStatus('${task['Task ID']}', this.value)" class="mt-1 border p-2 rounded w-full text-black">
+  <option value="" disabled ${!task.Status ? "selected" : ""}>Select Status</option>
+  <option ${task.Status === "Pending" ? "selected" : ""}>Pending</option>
+  <option ${task.Status === "In Progress" ? "selected" : ""}>In Progress</option>
+  <option ${task.Status === "Completed" ? "selected" : ""}>Completed</option>
+</select>
+
           </div>
           <div class="mt-3">
             <textarea onchange="updateNotes('${task['Task ID']}', this.value)" class="w-full p-2 border rounded text-black" placeholder="Notes...">${task.Notes || ""}</textarea>
