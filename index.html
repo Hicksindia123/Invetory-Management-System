@@ -63,9 +63,9 @@
     </div>
   </div>
 
-  <!-- Original JavaScript unchanged -->
+  <!-- JavaScript -->
   <script>
-    const API = "https://script.google.com/macros/s/AKfycbxysg2237rhkUjlCkanS1hNHN5ChjSRBGuYyG8b9pk4usHpYJ9BbjEbQoJgUs4jPbkW/exec";
+    const API = "https://script.google.com/macros/s/AKfycby20HXIPbA4eIhaXzsDuX-y02FOSmCuGfjtXO3EoMgMqn3hf8V2yl7_gmxbG-1rrUCu/exec";
     let role = "User";
     let empMap = {};
 
@@ -123,13 +123,12 @@
           <div class="text-sm">🔥 <span class="font-medium">Priority:</span> <strong>${task.Priority}</strong></div>
           <div class="mt-2">
             <label class="text-sm font-medium">Status:</label>
-             <select onchange="updateStatus('${task['Task ID']}', this.value)" class="mt-1 border p-2 rounded w-full text-black">
-  <option value="" disabled ${!task.Status ? "selected" : ""}>Select Status</option>
-  <option ${task.Status === "Pending" ? "selected" : ""}>Pending</option>
-  <option ${task.Status === "In Progress" ? "selected" : ""}>In Progress</option>
-  <option ${task.Status === "Completed" ? "selected" : ""}>Completed</option>
-</select>
-
+            <select onchange="updateStatus('${task['Task ID']}', this.value)" class="mt-1 border p-2 rounded w-full text-black">
+              <option value="" disabled ${!task.Status ? "selected" : ""}>Select Status</option>
+              <option ${task.Status === "Pending" ? "selected" : ""}>Pending</option>
+              <option ${task.Status === "In Progress" ? "selected" : ""}>In Progress</option>
+              <option ${task.Status === "Completed" ? "selected" : ""}>Completed</option>
+            </select>
           </div>
           <div class="mt-3">
             <textarea onchange="updateNotes('${task['Task ID']}', this.value)" class="w-full p-2 border rounded text-black" placeholder="Notes...">${task.Notes || ""}</textarea>
@@ -183,8 +182,9 @@
           task, assignedTo, email, deadline,
           status: "Pending", priority, notes
         })
-      });
-      alert("Task Assigned!");
+      })
+      .then(res => res.text())
+      .then(msg => alert(msg));
     }
   </script>
 </body>
