@@ -123,7 +123,6 @@
           <div class="text-sm">🔥 <span class="font-medium">Priority:</span> <strong>${task.Priority}</strong></div>
           <div class="mt-2">
             <label class="text-sm font-medium">Status:</label>
-            <select onchange="updateStatus('${task['Task ID']}', this.value)" class="mt-1 border p-2 rounded w-full text-black">
              <select onchange="updateStatus('${task['Task ID']}', this.value)" class="mt-1 border p-2 rounded w-full text-black">
   <option value="" disabled ${!task.Status ? "selected" : ""}>Select Status</option>
   <option ${task.Status === "Pending" ? "selected" : ""}>Pending</option>
