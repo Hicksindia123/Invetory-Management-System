@@ -33,14 +33,19 @@
       <div class="p-4 bg-white shadow rounded">
         <h2 class="text-xl font-semibold mb-2">📝 Assign Task</h2>
         <input id="taskTitle" class="border p-2 rounded w-full mb-2" placeholder="Task Title" />
-        <select id="taskAssignee" class="border p-2 rounded w-full mb-2"></select>
+        <select id="taskAssignee" class="border p-2 rounded w-full mb-2">
+  <option value="" disabled selected>Select Assignee</option>
+</select>
+
         <input id="taskEmail" class="border p-2 rounded w-full mb-2" placeholder="Assignee Email" />
         <input id="taskDeadline" type="date" class="border p-2 rounded w-full mb-2" />
-        <select id="taskPriority" class="border p-2 rounded w-full mb-2">
-          <option>Low</option>
-          <option>Medium</option>
-          <option>High</option>
-        </select>
+       <select id="taskPriority" class="border p-2 rounded w-full mb-2">
+  <option value="" disabled selected>Select Priority</option>
+  <option>Low</option>
+  <option>Medium</option>
+  <option>High</option>
+</select>
+
         <textarea id="taskNotes" class="border p-2 rounded w-full mb-2" placeholder="Notes (optional)"></textarea>
         <button onclick="assignTask()" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">Assign Task</button>
       </div>
