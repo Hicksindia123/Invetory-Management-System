@@ -4,60 +4,66 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Task Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+  </style>
 </head>
 <body class="bg-gradient-to-br from-indigo-100 to-blue-50 min-h-screen text-gray-900">
   <div class="max-w-5xl mx-auto p-6">
-    <h1 class="text-4xl font-bold mb-4 text-blue-800">📋 Task Dashboard</h1>
+    <h1 class="text-4xl font-extrabold mb-8 text-indigo-800 tracking-tight">📋 Task Dashboard</h1>
 
     <!-- Login Section -->
-    <div id="loginSection" class="mb-6">
-      <label class="block font-semibold mb-1">Enter your email:</label>
-      <input id="emailInput" type="email" class="border rounded p-2 w-full" placeholder="you@example.com" />
-      <button onclick="loadDashboard()" class="bg-blue-600 text-white px-4 py-2 mt-2 rounded hover:bg-blue-700">Login</button>
+    <div id="loginSection" class="mb-10 p-6 bg-white rounded-xl shadow border border-indigo-200">
+      <label class="block font-semibold mb-2 text-indigo-700">Enter your email:</label>
+      <input id="emailInput" type="email" class="border-gray-300 rounded-lg p-3 w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="you@example.com" />
+      <button onclick="loadDashboard()" class="bg-indigo-600 text-white px-6 py-2 mt-4 rounded-lg hover:bg-indigo-700 transition">Login</button>
     </div>
 
     <!-- Admin Panel -->
-    <div id="adminPanel" class="hidden space-y-6 mb-10">
+    <div id="adminPanel" class="hidden space-y-8 mb-10">
+
       <!-- Add Employee -->
-      <div class="p-4 bg-white shadow rounded">
-        <h2 class="text-xl font-semibold mb-2">👥 Add Employee</h2>
-        <input id="empName" class="border p-2 rounded w-full mb-2" placeholder="Name" />
-        <input id="empEmail" class="border p-2 rounded w-full mb-2" placeholder="Email" />
-        <input id="empRole" class="border p-2 rounded w-full mb-2" placeholder="Role (e.g. Admin, MIS)" />
-        <input id="empDept" class="border p-2 rounded w-full mb-2" placeholder="Department" />
-        <button onclick="addEmployee()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Add Employee</button>
+      <div class="p-6 bg-white rounded-xl shadow border border-gray-200">
+        <h2 class="text-2xl font-semibold mb-4 text-gray-800 flex items-center">👥 <span class="ml-2">Add Employee</span></h2>
+        <input id="empName" class="border-gray-300 p-3 rounded-lg w-full mb-3 shadow-sm" placeholder="Name" />
+        <input id="empEmail" class="border-gray-300 p-3 rounded-lg w-full mb-3 shadow-sm" placeholder="Email" />
+        <input id="empRole" class="border-gray-300 p-3 rounded-lg w-full mb-3 shadow-sm" placeholder="Role (e.g. Admin, MIS)" />
+        <input id="empDept" class="border-gray-300 p-3 rounded-lg w-full mb-4 shadow-sm" placeholder="Department" />
+        <button onclick="addEmployee()" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition">Add Employee</button>
       </div>
 
       <!-- Assign Task -->
-      <div class="p-4 bg-white shadow rounded">
-        <h2 class="text-xl font-semibold mb-2">📝 Assign Task</h2>
-        <input id="taskTitle" class="border p-2 rounded w-full mb-2" placeholder="Task Title" />
-        <select id="taskAssignee" class="border p-2 rounded w-full mb-2">
-  <option value="" disabled selected>Select Assignee</option>
-</select>
-
-        <input id="taskEmail" class="border p-2 rounded w-full mb-2" placeholder="Assignee Email" />
-        <input id="taskDeadline" type="date" class="border p-2 rounded w-full mb-2" />
-       <select id="taskPriority" class="border p-2 rounded w-full mb-2">
-  <option value="" disabled selected>Select Priority</option>
-  <option>Low</option>
-  <option>Medium</option>
-  <option>High</option>
-</select>
-
-        <textarea id="taskNotes" class="border p-2 rounded w-full mb-2" placeholder="Notes (optional)"></textarea>
-        <button onclick="assignTask()" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">Assign Task</button>
+      <div class="p-6 bg-white rounded-xl shadow border border-gray-200">
+        <h2 class="text-2xl font-semibold mb-4 text-gray-800 flex items-center">📝 <span class="ml-2">Assign Task</span></h2>
+        <input id="taskTitle" class="border-gray-300 p-3 rounded-lg w-full mb-3 shadow-sm" placeholder="Task Title" />
+        <select id="taskAssignee" class="border-gray-300 p-3 rounded-lg w-full mb-3 shadow-sm">
+          <option value="" disabled selected>Select Assignee</option>
+        </select>
+        <input id="taskEmail" class="border-gray-300 p-3 rounded-lg w-full mb-3 shadow-sm" placeholder="Assignee Email" />
+        <input id="taskDeadline" type="date" class="border-gray-300 p-3 rounded-lg w-full mb-3 shadow-sm" />
+        <select id="taskPriority" class="border-gray-300 p-3 rounded-lg w-full mb-3 shadow-sm">
+          <option value="" disabled selected>Select Priority</option>
+          <option>Low</option>
+          <option>Medium</option>
+          <option>High</option>
+        </select>
+        <textarea id="taskNotes" class="border-gray-300 p-3 rounded-lg w-full mb-4 shadow-sm" placeholder="Notes (optional)"></textarea>
+        <button onclick="assignTask()" class="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition">Assign Task</button>
       </div>
     </div>
 
     <!-- Task Section (User only) -->
     <div id="taskSection" class="hidden">
-      <h2 class="text-xl font-semibold text-blue-900 mb-4">📌 My Tasks</h2>
+      <h2 class="text-2xl font-semibold text-indigo-900 mb-4">📌 My Tasks</h2>
       <div id="taskList" class="space-y-4"></div>
     </div>
   </div>
 
+  <!-- Original JavaScript unchanged -->
   <script>
     const API = "https://script.google.com/macros/s/AKfycbxysg2237rhkUjlCkanS1hNHN5ChjSRBGuYyG8b9pk4usHpYJ9BbjEbQoJgUs4jPbkW/exec";
     let role = "User";
@@ -110,7 +116,7 @@
         const priorityColor = task.Priority === "High" ? "bg-gradient-to-r from-pink-500 to-indigo-700 text-white" : task.Priority === "Medium" ? "bg-yellow-300" : "bg-green-400";
 
         const el = document.createElement("div");
-        el.className = `p-4 bg-white rounded shadow border-l-4 ${priorityColor}`;
+        el.className = `p-4 bg-white rounded-xl shadow border-l-4 ${priorityColor}`;
         el.innerHTML = `
           <div class="font-bold text-lg">${task.Task}</div>
           <div class="text-sm text-gray-700">📅 Deadline: <strong>${deadline}</strong></div>
